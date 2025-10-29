@@ -55,6 +55,7 @@
             this.addBook.TabIndex = 1;
             this.addBook.Text = "Добавить книгу";
             this.addBook.UseVisualStyleBackColor = true;
+            this.addBook.Click += new System.EventHandler(this.addBook_Click);
             // 
             // deleteBook
             // 
@@ -62,8 +63,9 @@
             this.deleteBook.Name = "deleteBook";
             this.deleteBook.Size = new System.Drawing.Size(388, 76);
             this.deleteBook.TabIndex = 2;
-            this.deleteBook.Text = "Удалить книгу";
+            this.deleteBook.Text = "Cписать книгу";
             this.deleteBook.UseVisualStyleBackColor = true;
+            this.deleteBook.Click += new System.EventHandler(this.deleteBook_Click);
             // 
             // sortData
             // 
@@ -73,6 +75,7 @@
             this.sortData.TabIndex = 3;
             this.sortData.Text = "Сортировать по дате выпуска";
             this.sortData.UseVisualStyleBackColor = true;
+            this.sortData.Click += new System.EventHandler(this.sortData_Click);
             // 
             // sortAutor
             // 
@@ -82,6 +85,7 @@
             this.sortAutor.TabIndex = 4;
             this.sortAutor.Text = "Сортировать по авторам";
             this.sortAutor.UseVisualStyleBackColor = true;
+            this.sortAutor.Click += new System.EventHandler(this.sortAutor_Click);
             // 
             // Form1
             // 
