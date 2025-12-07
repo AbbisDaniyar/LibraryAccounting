@@ -8,7 +8,7 @@ using System.Windows.Forms;
 
 namespace LibraryAccounting
 {
-    public static class JsonDataSerice
+    public static class JsonDataService
     {
         private static readonly string FilePath = "books.json";
 

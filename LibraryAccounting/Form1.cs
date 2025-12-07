@@ -14,16 +14,18 @@ namespace LibraryAccounting
     {
         private List<Book> books;
         private BindingList<Book> bindingBooks;
+        private List<Book> originalBooks;
 
         public Form1()
         {
             InitializeComponent();
             InitializeData();
+            originalBooks = new List<Book>(books);
         }
 
         private void InitializeData()
         {
-            books = JsonDataSerice.LoadBooks();
+            books = JsonDataService.LoadBooks();
 
             if (books.Count == 0)
             {books.Add(new Book("A.C. Пушкин", 1833, "Евгений Онегин", 5));
@@ -33,6 +35,7 @@ namespace LibraryAccounting
             books.Add(new Book("М.Ю. Лермонтов", 1840, "Герой нашего времени", 1));
             }
 
+            originalBooks = new List<Book>(books);  
             bindingBooks = new BindingList<Book>(books);
             dataGridViewLibrary.DataSource = bindingBooks;
             
@@ -41,13 +44,14 @@ namespace LibraryAccounting
         private void RefreshDataGrid()
         {
             bindingBooks = new BindingList<Book>(books);
+            dataGridViewLibrary.DataSource = null;
             dataGridViewLibrary.DataSource = bindingBooks;
             dataGridViewLibrary.Refresh();
         }
 
         private void SaveData()
         {
-            JsonDataSerice.SaveBooks(books);
+            JsonDataService.SaveBooks(books);
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -68,6 +72,7 @@ namespace LibraryAccounting
                     if (masage == DialogResult.Yes)
                     {
                         books.Remove(selectedBook);
+                        originalBooks.Remove(selectedBook);
                         RefreshDataGrid();
                         SaveData();
                         MessageBox.Show("Книга успешно списана!", "Успех",
@@ -83,27 +88,13 @@ namespace LibraryAccounting
 
         }
 
-        private void sortAutor_Click(object sender, EventArgs e)
-        {
-            books.Sort((x,y) => x.Author.CompareTo(y.Author));
-            RefreshDataGrid();
-            MessageBox.Show("Книги отсортированы по авторам.", "Сортировка",
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
-
-        private void sortData_Click(object sender, EventArgs e)
-        {
-            books.Sort((x, y) => x.Year.CompareTo(y.Year));
-            RefreshDataGrid();
-            MessageBox.Show("Книги отсортированы по годам издания.", "Сортировка",
-                MessageBoxButtons.OK, MessageBoxIcon.Information);
-        }
 
         private void addBook_Click(object sender, EventArgs e)
         {
             using (var addForm = new Form2()) {
                 if (addForm.ShowDialog() == DialogResult.OK) {
                     books.Add(addForm.NewBook);
+                    originalBooks.Add(addForm.NewBook);
                     RefreshDataGrid();
                     SaveData();
 
@@ -113,5 +104,101 @@ namespace LibraryAccounting
             }
 
         }
+
+        private void btnSort_Click(object sender, EventArgs e)
+        {
+            string selectedField = comboBoxField.SelectedItem.ToString();
+
+            if (string.IsNullOrEmpty(selectedField)) {
+                MessageBox.Show("Выберете поле для сортировки", "Внимание", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            switch (selectedField)
+            {
+                case "Автор":
+                    books.Sort((x, y) => x.Author.CompareTo(y.Author));
+                    break;
+                case "Год издания":
+                    books.Sort((x, y) => x.Year.CompareTo(y.Year));
+                    break;
+                case "Название":
+                    books.Sort((x, y) => x.Title.CompareTo(y.Title));
+                    break;
+                case "Кол-во экземпляров":
+                    books.Sort((x, y) => x.Copies.CompareTo(y.Copies));
+                    break;
+            }
+
+            RefreshDataGrid();
+            MessageBox.Show($"Книги отсортированы по полю:{selectedField}", "Сортировка", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void btnSearch_Click(object sender, EventArgs e)
+        {
+            string searchText = txtSearch.Text.Trim();
+            string selectedField = comboBoxField.SelectedItem?.ToString();
+
+            if (string.IsNullOrEmpty(searchText))
+            {
+                MessageBox.Show("Введите текст для поиска", "Внимание", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                txtSearch.Focus();
+                return;
+            }
+
+            List<Book> searchResults = new List<Book>();
+
+            switch (selectedField)
+            {
+                case "Автор":
+                    searchResults = books.Where(b => b.Author.ToLower().Contains(searchText.ToLower())).ToList();
+                    break;
+                case "Год издания":
+                    if (int.TryParse(searchText, out int year))
+                    {
+                        searchResults = books.Where(b => b.Year == year).ToList();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Введите коректный год для поиска", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+                    break;
+                case "Название":
+                    searchResults = books.Where(b => b.Title.ToLower().Contains(searchText.ToLower())).ToList();
+                    break;
+                case "Кол-во экземпляров":
+                    if (int.TryParse(searchText, out int copies))
+                    {
+                        searchResults = books.Where(b => b.Copies == copies).ToList();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Введите коректное число для поиска", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+                    break;
+            }
+
+            if (originalBooks.Count != books.Count || !books.SequenceEqual(originalBooks))
+            {
+                originalBooks = new List<Book>(books);
+            }
+
+            bindingBooks = new BindingList<Book>(searchResults);
+            dataGridViewLibrary.DataSource = bindingBooks;
+            dataGridViewLibrary.Refresh();
+
+            MessageBox.Show($"Найдено {searchResults.Count} книг", "Результат поиска", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void btnClearSearch_Click(object sender, EventArgs e)
+        {
+            books = new List<Book>(originalBooks);
+            txtSearch.Clear();
+            RefreshDataGrid();
+        }
+
+
     }
 }

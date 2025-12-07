@@ -118,7 +118,7 @@
             // 
             this.cansel.Location = new System.Drawing.Point(216, 137);
             this.cansel.Name = "cansel";
-            this.cansel.Size = new System.Drawing.Size(195, 62);
+            this.cansel.Size = new System.Drawing.Size(190, 62);
             this.cansel.TabIndex = 9;
             this.cansel.Text = "Отмена";
             this.cansel.UseVisualStyleBackColor = true;

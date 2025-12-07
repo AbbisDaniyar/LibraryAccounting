@@ -28,5 +28,7 @@ namespace LibraryAccounting
         {
             return $"{Author} \"{Title}\" ({Year}) - {Copies} шт.";
         }
+
+
     }
 }
